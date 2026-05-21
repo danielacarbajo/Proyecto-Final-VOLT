@@ -23,10 +23,11 @@
                         <span class="text-sm text-neutral-400 hidden sm:inline">GymTracker</span>
                     </a>
 
-                    <nav class="hidden md:flex items-center gap-6">
+    <nav class="hidden md:flex items-center gap-6">
     <a href="{{ route('panel') }}" class="text-sm hover:text-[#facc15] transition">Panel</a>
     <a href="{{ route('rutinas.index') }}" class="text-sm hover:text-[#facc15] transition">Mis rutinas</a>
     <a href="{{ route('ejercicios.index') }}" class="text-sm hover:text-[#facc15] transition">Ejercicios</a>
+    <a href="{{ route('entrenamientos.index') }}" class="text-sm hover:text-[#facc15] transition">Entrenamientos</a>
 </nav>
 
                     {{-- Usuario y logout --}}

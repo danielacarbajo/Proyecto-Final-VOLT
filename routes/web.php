@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RutinaController;
 use App\Http\Controllers\EjercicioController;
+use App\Http\Controllers\EntrenamientoController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,11 +16,9 @@ Route::get('/', function () {
     return redirect()->route('login');
 });
 
-// Registro
 Route::get('/registro', [AuthController::class, 'mostrarRegistro'])->name('registro');
 Route::post('/registro', [AuthController::class, 'registrar']);
 
-// Login
 Route::get('/login', [AuthController::class, 'mostrarLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'iniciarSesion']);
 
@@ -32,18 +31,17 @@ Route::post('/login', [AuthController::class, 'iniciarSesion']);
 
 Route::middleware('auth')->group(function () {
 
-    // Logout
     Route::post('/logout', [AuthController::class, 'cerrarSesion'])->name('logout');
 
-    // Panel principal
     Route::get('/panel', function () {
         return view('panel');
     })->name('panel');
 
-    // Rutinas
     Route::resource('rutinas', RutinaController::class);
 
-    // Ejercicios
     Route::resource('ejercicios', EjercicioController::class)->except('show');
+
+    Route::resource('entrenamientos', EntrenamientoController::class)
+        ->except(['edit', 'update']);
 
 });
