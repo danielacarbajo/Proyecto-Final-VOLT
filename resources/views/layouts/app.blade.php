@@ -26,6 +26,7 @@
                     <nav class="hidden md:flex items-center gap-6">
     <a href="{{ route('panel') }}" class="text-sm hover:text-[#facc15] transition">Panel</a>
     <a href="{{ route('rutinas.index') }}" class="text-sm hover:text-[#facc15] transition">Mis rutinas</a>
+    <a href="{{ route('ejercicios.index') }}" class="text-sm hover:text-[#facc15] transition">Ejercicios</a>
 </nav>
 
                     {{-- Usuario y logout --}}

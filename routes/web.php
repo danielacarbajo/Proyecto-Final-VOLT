@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\RutinaController;
+use App\Http\Controllers\EjercicioController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -39,7 +40,10 @@ Route::middleware('auth')->group(function () {
         return view('panel');
     })->name('panel');
 
-    // Rutinas (CRUD completo)
+    // Rutinas
     Route::resource('rutinas', RutinaController::class);
+
+    // Ejercicios
+    Route::resource('ejercicios', EjercicioController::class)->except('show');
 
 });
