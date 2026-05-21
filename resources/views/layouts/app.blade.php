@@ -23,11 +23,10 @@
                         <span class="text-sm text-neutral-400 hidden sm:inline">GymTracker</span>
                     </a>
 
-                    {{-- Menú principal --}}
                     <nav class="hidden md:flex items-center gap-6">
-                        <a href="{{ route('panel') }}" class="text-sm hover:text-[#facc15] transition">Panel</a>
-                        {{-- Aquí iremos añadiendo más enlaces conforme creemos las secciones --}}
-                    </nav>
+    <a href="{{ route('panel') }}" class="text-sm hover:text-[#facc15] transition">Panel</a>
+    <a href="{{ route('rutinas.index') }}" class="text-sm hover:text-[#facc15] transition">Mis rutinas</a>
+</nav>
 
                     {{-- Usuario y logout --}}
                     <div class="flex items-center gap-4">
