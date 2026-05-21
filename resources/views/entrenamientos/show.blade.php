@@ -28,15 +28,21 @@
                 @endif
             </div>
 
-            <form action="{{ route('entrenamientos.destroy', $entrenamiento) }}" method="POST" class="inline"
-                  onsubmit="return confirm('¿Seguro que quieres eliminar este entrenamiento?');">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="text-sm bg-red-50 hover:bg-red-100 text-red-700 px-4 py-2 rounded-lg transition">
-                    Eliminar
-                </button>
-            </form>
-        </div>
+<div class="flex items-center gap-2">
+    <a href="{{ route('entrenamientos.edit', $entrenamiento) }}"
+       class="text-sm bg-[#facc15] hover:bg-[#eab308] text-[#0f172a] font-semibold px-4 py-2 rounded-lg transition">
+        Editar
+    </a>
+
+    <form action="{{ route('entrenamientos.destroy', $entrenamiento) }}" method="POST" class="inline"
+          onsubmit="return confirm('¿Seguro que quieres eliminar este entrenamiento?');">
+        @csrf
+        @method('DELETE')
+        <button type="submit" class="text-sm bg-red-50 hover:bg-red-100 text-red-700 px-4 py-2 rounded-lg transition">
+            Eliminar
+        </button>
+    </form>
+</div>
 
         {{-- Detalles --}}
         <h2 class="text-sm font-semibold text-neutral-700 uppercase tracking-wide mb-4">

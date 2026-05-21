@@ -41,7 +41,6 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('ejercicios', EjercicioController::class)->except('show');
 
-    Route::resource('entrenamientos', EntrenamientoController::class)
-        ->except(['edit', 'update']);
+    Route::resource('entrenamientos', EntrenamientoController::class);
 
 });
