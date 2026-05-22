@@ -22,19 +22,15 @@ class PanelController extends Controller
         // MÉTRICAS BÁSICAS
         // ====================
 
-        // Total de entrenamientos del usuario.
         $totalEntrenamientos = Entrenamiento::where('usuario_id', $usuario->id)->count();
 
-        // Entrenamientos del mes en curso.
         $entrenamientosMes = Entrenamiento::where('usuario_id', $usuario->id)
             ->whereMonth('fecha_entrenamiento', $ahora->month)
             ->whereYear('fecha_entrenamiento', $ahora->year)
             ->count();
 
-        // Total de rutinas creadas.
         $totalRutinas = Rutina::where('usuario_id', $usuario->id)->count();
 
-        // Total de ejercicios creados.
         $totalEjercicios = Ejercicio::where('usuario_id', $usuario->id)->count();
 
         // ====================
@@ -69,6 +65,25 @@ class PanelController extends Controller
             ->first();
 
         // ====================
+        // ACTIVIDAD SEMANAL (últimos 7 días, lunes a domingo)
+        // ====================
+
+        $actividadSemana = [];
+
+        // Empezamos por el lunes de esta semana.
+        $inicioSemana = $ahora->copy()->startOfWeek(); // Lunes 00:00:00
+
+        for ($i = 0; $i < 7; $i++) {
+            $dia = $inicioSemana->copy()->addDays($i);
+
+            $cantidad = Entrenamiento::where('usuario_id', $usuario->id)
+                ->whereDate('fecha_entrenamiento', $dia->toDateString())
+                ->count();
+
+            $actividadSemana[] = $cantidad;
+        }
+
+        // ====================
         // FLAG: usuario sin actividad
         // ====================
 
@@ -82,6 +97,7 @@ class PanelController extends Controller
             'ultimoEntrenamiento',
             'ultimosEntrenamientos',
             'rutinaMasUsada',
+            'actividadSemana',
             'sinActividad'
         ));
     }
