@@ -90,7 +90,6 @@
             @enderror
         </div>
 
-        {{-- Mensaje cuando hay filtros aplicados pero sin resultados --}}
         @if ($entrenamientos->isEmpty())
             <div class="bg-yellow-50 border border-yellow-200 rounded-2xl p-6 text-center">
                 <p class="text-yellow-800 font-medium mb-2">No se encontraron entrenamientos con esos filtros.</p>
@@ -142,6 +141,12 @@
                                            class="text-sm text-[#0f172a] hover:text-[#eab308] font-medium transition">
                                             Editar
                                         </a>
+                                        <form action="{{ route('entrenamientos.duplicar', $entrenamiento) }}" method="POST" class="inline">
+                                            @csrf
+                                            <button type="submit" class="text-sm text-[#0f172a] hover:text-[#eab308] font-medium transition">
+                                                Duplicar
+                                            </button>
+                                        </form>
                                         <form action="{{ route('entrenamientos.destroy', $entrenamiento) }}" method="POST" class="inline"
                                               onsubmit="return confirm('¿Seguro que quieres eliminar este entrenamiento?');">
                                             @csrf

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Ejercicio;
+use App\Models\DetalleEntrenamiento;
+use App\Helpers\EjercicioHelper;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -11,12 +13,27 @@ class EjercicioController extends Controller
 {
     /**
      * Lista todos los ejercicios del usuario autenticado.
+     * Incluye el mejor récord (PR) de cada ejercicio.
      */
     public function index(): View
     {
         $ejercicios = Ejercicio::where('usuario_id', auth()->id())
             ->orderBy('nombre')
             ->get();
+
+        $usuarioId = auth()->id();
+        foreach ($ejercicios as $ejercicio) {
+            $mejorDetalle = DetalleEntrenamiento::where('ejercicio_id', $ejercicio->id)
+                ->whereHas('entrenamiento', function ($q) use ($usuarioId) {
+                    $q->where('usuario_id', $usuarioId);
+                })
+                ->with('entrenamiento')
+                ->orderByDesc('peso')
+                ->orderByDesc('repeticiones')
+                ->first();
+
+            $ejercicio->pr = $mejorDetalle;
+        }
 
         return view('ejercicios.index', compact('ejercicios'));
     }
@@ -26,31 +43,33 @@ class EjercicioController extends Controller
      */
     public function create(): View
     {
-        return view('ejercicios.create');
+        $ejerciciosAgrupados = EjercicioHelper::ejerciciosAgrupados();
+        return view('ejercicios.create', compact('ejerciciosAgrupados'));
     }
 
     /**
      * Guarda un nuevo ejercicio.
+     * El grupo muscular se asigna automáticamente desde el catálogo.
      */
     public function store(Request $request): RedirectResponse
     {
         $datos = $request->validate([
             'nombre' => ['required', 'string', 'max:100'],
-            'grupo_muscular' => ['nullable', 'string', 'max:50'],
         ], [
-            'nombre.required' => 'El nombre del ejercicio es obligatorio.',
-            'nombre.max' => 'El nombre no puede tener más de 100 caracteres.',
-            'grupo_muscular.max' => 'El grupo muscular no puede tener más de 50 caracteres.',
+            'nombre.required' => 'Debes seleccionar un ejercicio del catálogo.',
         ]);
+
+        // Asignar automáticamente el grupo muscular según el catálogo.
+        $grupo = EjercicioHelper::grupoDeEjercicio($datos['nombre']);
 
         Ejercicio::create([
             'usuario_id' => auth()->id(),
             'nombre' => $datos['nombre'],
-            'grupo_muscular' => $datos['grupo_muscular'] ?? null,
+            'grupo_muscular' => $grupo, // Será null si es personalizado.
         ]);
 
         return redirect()->route('ejercicios.index')
-            ->with('exito', 'Ejercicio creado correctamente.');
+            ->with('exito', 'Ejercicio añadido a tu catálogo personal.');
     }
 
     /**
@@ -60,7 +79,8 @@ class EjercicioController extends Controller
     {
         $this->autorizar($ejercicio);
 
-        return view('ejercicios.edit', compact('ejercicio'));
+        $ejerciciosAgrupados = EjercicioHelper::ejerciciosAgrupados();
+        return view('ejercicios.edit', compact('ejercicio', 'ejerciciosAgrupados'));
     }
 
     /**
@@ -72,14 +92,17 @@ class EjercicioController extends Controller
 
         $datos = $request->validate([
             'nombre' => ['required', 'string', 'max:100'],
-            'grupo_muscular' => ['nullable', 'string', 'max:50'],
         ], [
-            'nombre.required' => 'El nombre del ejercicio es obligatorio.',
-            'nombre.max' => 'El nombre no puede tener más de 100 caracteres.',
-            'grupo_muscular.max' => 'El grupo muscular no puede tener más de 50 caracteres.',
+            'nombre.required' => 'Debes seleccionar un ejercicio del catálogo.',
         ]);
 
-        $ejercicio->update($datos);
+        // Reasignar grupo según el nuevo nombre.
+        $grupo = EjercicioHelper::grupoDeEjercicio($datos['nombre']);
+
+        $ejercicio->update([
+            'nombre' => $datos['nombre'],
+            'grupo_muscular' => $grupo,
+        ]);
 
         return redirect()->route('ejercicios.index')
             ->with('exito', 'Ejercicio actualizado correctamente.');
@@ -99,8 +122,54 @@ class EjercicioController extends Controller
     }
 
     /**
-     * Helper de autorización.
+     * Muestra la gráfica de progreso de un ejercicio.
      */
+    public function progreso(Ejercicio $ejercicio): View
+    {
+        $this->autorizar($ejercicio);
+
+        $usuarioId = auth()->id();
+
+        $registros = DetalleEntrenamiento::where('ejercicio_id', $ejercicio->id)
+            ->whereHas('entrenamiento', function ($q) use ($usuarioId) {
+                $q->where('usuario_id', $usuarioId);
+            })
+            ->with('entrenamiento')
+            ->get()
+            ->sortBy(fn($d) => $d->entrenamiento->fecha_entrenamiento);
+
+        $datosPorFecha = $registros
+            ->groupBy(fn($d) => $d->entrenamiento->fecha_entrenamiento->format('Y-m-d'))
+            ->map(function ($detallesDeUnDia) {
+                return [
+                    'peso_max' => $detallesDeUnDia->max('peso'),
+                    'reps_max' => $detallesDeUnDia->max('repeticiones'),
+                    'series_total' => $detallesDeUnDia->sum('series'),
+                ];
+            });
+
+        $etiquetas = $datosPorFecha->keys()->map(function ($fecha) {
+            return \Carbon\Carbon::parse($fecha)->format('d/m/Y');
+        })->values();
+
+        $pesos = $datosPorFecha->pluck('peso_max')->values();
+
+        $totalRegistros = $registros->count();
+        $pesoMaximo = $registros->max('peso');
+        $pesoMinimo = $registros->min('peso');
+        $diferencia = $pesoMaximo !== null && $pesoMinimo !== null ? ($pesoMaximo - $pesoMinimo) : 0;
+
+        return view('ejercicios.progreso', compact(
+            'ejercicio',
+            'etiquetas',
+            'pesos',
+            'totalRegistros',
+            'pesoMaximo',
+            'pesoMinimo',
+            'diferencia'
+        ));
+    }
+
     private function autorizar(Ejercicio $ejercicio): void
     {
         if ($ejercicio->usuario_id !== auth()->id()) {

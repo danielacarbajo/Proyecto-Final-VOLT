@@ -58,7 +58,6 @@ class RutinaController extends Controller
      */
     public function show(Rutina $rutina): View
     {
-        // Verificar que la rutina pertenezca al usuario autenticado.
         $this->autorizar($rutina);
 
         return view('rutinas.show', compact('rutina'));
@@ -107,6 +106,40 @@ class RutinaController extends Controller
 
         return redirect()->route('rutinas.index')
             ->with('exito', 'Rutina eliminada correctamente.');
+    }
+
+    /**
+     * Duplica una rutina existente del usuario.
+     * Crea una copia con el mismo nombre + " (copia)" y la misma descripción.
+     * Si la rutina tiene ejercicios asociados (tabla detalle_rutina),
+     * también se duplican.
+     */
+    public function duplicar(Rutina $rutina): RedirectResponse
+    {
+        $this->autorizar($rutina);
+
+        // Crear la rutina duplicada.
+        $copia = Rutina::create([
+            'usuario_id' => auth()->id(),
+            'nombre' => $rutina->nombre . ' (copia)',
+            'descripcion' => $rutina->descripcion,
+        ]);
+
+        // Si la rutina tiene ejercicios asociados, los duplicamos también.
+        // Esto solo se ejecuta si la relación `detalles` está definida en el modelo Rutina.
+        if (method_exists($rutina, 'detalles')) {
+            foreach ($rutina->detalles as $detalle) {
+                $copia->detalles()->create([
+                    'ejercicio_id' => $detalle->ejercicio_id,
+                    'series_por_defecto' => $detalle->series_por_defecto,
+                    'repeticiones_por_defecto' => $detalle->repeticiones_por_defecto,
+                    'posicion' => $detalle->posicion,
+                ]);
+            }
+        }
+
+        return redirect()->route('rutinas.index')
+            ->with('exito', 'Rutina duplicada correctamente.');
     }
 
     /**

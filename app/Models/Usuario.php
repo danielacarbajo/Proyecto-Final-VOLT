@@ -24,6 +24,8 @@ class Usuario extends Authenticatable
         'rol_id',
         'nombre',
         'email',
+        'activo',
+        'foto',
         'contrasena',
         'fecha_creacion',
     ];
@@ -45,6 +47,7 @@ class Usuario extends Authenticatable
         return [
             'fecha_creacion' => 'date',
             'contrasena' => 'hashed',
+            'activo' => 'boolean',
         ];
     }
 

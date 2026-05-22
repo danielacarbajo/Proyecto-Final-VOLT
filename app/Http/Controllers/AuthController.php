@@ -24,7 +24,6 @@ class AuthController extends Controller
      */
     public function registrar(Request $request): RedirectResponse
     {
-        // 1. Validación de los datos del formulario.
         $datos = $request->validate([
             'nombre' => ['required', 'string', 'max:100'],
             'email' => ['required', 'email', 'max:150', 'unique:usuarios,email'],
@@ -39,21 +38,18 @@ class AuthController extends Controller
             'contrasena.confirmed' => 'Las contraseñas no coinciden.',
         ]);
 
-        // 2. Crear el nuevo usuario. La contraseña se cifra automáticamente
-        //    porque en el modelo Usuario tenemos 'contrasena' => 'hashed'.
         $usuario = Usuario::create([
-            'rol_id' => 1, // 1 = usuario normal (admin sería 2)
+            'rol_id' => 1,
             'nombre' => $datos['nombre'],
             'email' => $datos['email'],
             'contrasena' => $datos['contrasena'],
+            'activo' => true,
             'fecha_creacion' => now(),
         ]);
 
-        // 3. Iniciar sesión automáticamente con el nuevo usuario.
         Auth::login($usuario);
 
-        // 4. Redirigir al panel principal.
-        return redirect()->route('panel')->with('exito', '¡Bienvenido a VOLT, ' . $usuario->nombre . '!');
+        return redirect()->route('panel');
     }
 
     /**
@@ -69,7 +65,6 @@ class AuthController extends Controller
      */
     public function iniciarSesion(Request $request): RedirectResponse
     {
-        // 1. Validación.
         $datos = $request->validate([
             'email' => ['required', 'email'],
             'contrasena' => ['required'],
@@ -79,16 +74,27 @@ class AuthController extends Controller
             'contrasena.required' => 'La contraseña es obligatoria.',
         ]);
 
-        // 2. Buscamos el usuario por email y validamos la contraseña manualmente.
         $usuario = Usuario::where('email', $datos['email'])->first();
 
         if ($usuario && Hash::check($datos['contrasena'], $usuario->contrasena)) {
+
+            // Comprobar que la cuenta no esté bloqueada por el administrador.
+            if (!$usuario->activo) {
+                return back()->withErrors([
+                    'email' => 'Tu cuenta está bloqueada. Contacta con el administrador.',
+                ])->onlyInput('email');
+            }
+
             Auth::login($usuario, $request->boolean('recordar'));
-            $request->session()->regenerate(); // Por seguridad, regeneramos el ID de sesión.
+            $request->session()->regenerate();
+
+            if ($usuario->rol_id === 2) {
+                return redirect()->route('admin.panel');
+            }
+
             return redirect()->intended(route('panel'));
         }
 
-        // 3. Si falla, volver al formulario con un mensaje genérico (por seguridad, no decimos si el error es el email o la contraseña).
         return back()->withErrors([
             'email' => 'Las credenciales no son correctas.',
         ])->onlyInput('email');

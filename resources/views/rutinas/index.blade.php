@@ -58,6 +58,13 @@
                                 Editar
                             </a>
                             <span class="text-neutral-300">·</span>
+                            <form action="{{ route('rutinas.duplicar', $rutina) }}" method="POST" class="inline">
+                                @csrf
+                                <button type="submit" class="text-xs text-[#0f172a] hover:text-[#eab308] font-medium transition">
+                                    Duplicar
+                                </button>
+                            </form>
+                            <span class="text-neutral-300">·</span>
                             <form action="{{ route('rutinas.destroy', $rutina) }}" method="POST" class="inline"
                                   onsubmit="return confirm('¿Seguro que quieres eliminar la rutina &quot;{{ $rutina->nombre }}&quot;?');">
                                 @csrf
