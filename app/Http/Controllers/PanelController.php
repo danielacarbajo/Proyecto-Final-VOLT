@@ -34,12 +34,43 @@ class PanelController extends Controller
         $totalEjercicios = Ejercicio::where('usuario_id', $usuario->id)->count();
 
         // ====================
-        // ÚLTIMO ENTRENAMIENTO
+        // COMPARATIVA: ESTA SEMANA vs SEMANA PASADA
+        // ====================
+
+        $inicioSemanaActual = $ahora->copy()->startOfWeek();   // Lunes 00:00 esta semana
+        $finSemanaActual = $ahora->copy()->endOfWeek();        // Domingo 23:59 esta semana
+
+        $inicioSemanaPasada = $inicioSemanaActual->copy()->subWeek();
+        $finSemanaPasada = $finSemanaActual->copy()->subWeek();
+
+        $entrenamientosSemanaActual = Entrenamiento::where('usuario_id', $usuario->id)
+            ->whereBetween('fecha_entrenamiento', [$inicioSemanaActual, $finSemanaActual])
+            ->count();
+
+        $entrenamientosSemanaPasada = Entrenamiento::where('usuario_id', $usuario->id)
+            ->whereBetween('fecha_entrenamiento', [$inicioSemanaPasada, $finSemanaPasada])
+            ->count();
+
+        // Diferencia: positiva, negativa o cero
+        $diferenciaSemana = $entrenamientosSemanaActual - $entrenamientosSemanaPasada;
+
+        // ====================
+        // ÚLTIMO ENTRENAMIENTO (con sus detalles cargados)
         // ====================
 
         $ultimoEntrenamiento = Entrenamiento::where('usuario_id', $usuario->id)
+            ->with(['rutina', 'detalles'])
             ->orderBy('fecha_entrenamiento', 'desc')
             ->first();
+
+        // Calcular nº de ejercicios y nº total de series del último entreno
+        $ultimoEntrenoEjercicios = 0;
+        $ultimoEntrenoSeries = 0;
+
+        if ($ultimoEntrenamiento) {
+            $ultimoEntrenoEjercicios = $ultimoEntrenamiento->detalles->count();
+            $ultimoEntrenoSeries = $ultimoEntrenamiento->detalles->sum('series');
+        }
 
         // ====================
         // ÚLTIMOS 5 ENTRENAMIENTOS
@@ -65,13 +96,11 @@ class PanelController extends Controller
             ->first();
 
         // ====================
-        // ACTIVIDAD SEMANAL (últimos 7 días, lunes a domingo)
+        // ACTIVIDAD SEMANAL (lunes a domingo)
         // ====================
 
         $actividadSemana = [];
-
-        // Empezamos por el lunes de esta semana.
-        $inicioSemana = $ahora->copy()->startOfWeek(); // Lunes 00:00:00
+        $inicioSemana = $ahora->copy()->startOfWeek();
 
         for ($i = 0; $i < 7; $i++) {
             $dia = $inicioSemana->copy()->addDays($i);
@@ -94,7 +123,12 @@ class PanelController extends Controller
             'entrenamientosMes',
             'totalRutinas',
             'totalEjercicios',
+            'entrenamientosSemanaActual',
+            'entrenamientosSemanaPasada',
+            'diferenciaSemana',
             'ultimoEntrenamiento',
+            'ultimoEntrenoEjercicios',
+            'ultimoEntrenoSeries',
             'ultimosEntrenamientos',
             'rutinaMasUsada',
             'actividadSemana',
