@@ -3,18 +3,30 @@
 @section('contenido')
 <div class="max-w-4xl mx-auto">
 
-    <div class="mb-8">
-        <a href="{{ route('entrenamientos.show', $entrenamiento) }}" class="text-sm text-neutral-500 hover:text-[#0f172a] transition">
-            ← Volver al detalle
+    {{-- Botón Volver (PILL) --}}
+    <div class="mb-6">
+        <a href="{{ route('entrenamientos.show', $entrenamiento) }}"
+           class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-neutral-200 rounded-lg shadow-sm hover:shadow-md hover:border-neutral-300 transition text-sm font-medium text-neutral-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+            </svg>
+            Volver al detalle
         </a>
-        <h1 class="text-3xl font-bold text-[#0f172a] mt-2">Editar entrenamiento</h1>
+    </div>
+
+    {{-- Cabecera --}}
+    <div class="mb-8">
+        <h1 class="font-bebas text-4xl text-[#0f172a] tracking-wide pb-1">EDITAR ENTRENAMIENTO</h1>
         <p class="text-sm text-neutral-500 mt-1">Modifica los datos de tu sesión.</p>
     </div>
 
     @if ($ejercicios->isEmpty())
-        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-5 mb-6">
+        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-5 mb-6 flex items-start gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
             <p class="text-sm text-yellow-800">
-                ⚠️ <strong>No tienes ejercicios creados.</strong>
+                <strong>No tienes ejercicios creados.</strong>
                 Antes de editar este entrenamiento debes
                 <a href="{{ route('ejercicios.create') }}" class="underline font-semibold">crear al menos un ejercicio</a>.
             </p>
@@ -25,12 +37,11 @@
         @csrf
         @method('PUT')
 
-        {{-- Datos generales --}}
         <div class="bg-white border border-neutral-200 rounded-2xl shadow-sm p-6 mb-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
 
                 <div>
-                    <label for="fecha_entrenamiento" class="block text-sm font-medium text-neutral-700 mb-1">
+                    <label for="fecha_entrenamiento" class="block text-sm font-semibold text-neutral-700 mb-2">
                         Fecha <span class="text-red-500">*</span>
                     </label>
                     <input
@@ -39,7 +50,7 @@
                         name="fecha_entrenamiento"
                         value="{{ old('fecha_entrenamiento', $entrenamiento->fecha_entrenamiento->format('Y-m-d')) }}"
                         required
-                        class="w-full px-4 py-2.5 rounded-lg border border-neutral-300 focus:border-[#facc15] focus:ring-2 focus:ring-[#facc15]/20 transition outline-none"
+                        class="w-full px-4 py-3 rounded-lg border border-neutral-300 focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffd600]/20 transition outline-none"
                     >
                     @error('fecha_entrenamiento')
                         <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
@@ -47,13 +58,13 @@
                 </div>
 
                 <div>
-                    <label for="rutina_id" class="block text-sm font-medium text-neutral-700 mb-1">
-                        Rutina <span class="text-neutral-400 text-xs">(opcional)</span>
+                    <label for="rutina_id" class="block text-sm font-semibold text-neutral-700 mb-2">
+                        Rutina <span class="text-neutral-400 text-xs font-normal">(opcional)</span>
                     </label>
                     <select
                         id="rutina_id"
                         name="rutina_id"
-                        class="w-full px-4 py-2.5 rounded-lg border border-neutral-300 focus:border-[#facc15] focus:ring-2 focus:ring-[#facc15]/20 transition outline-none bg-white"
+                        class="w-full px-4 py-3 rounded-lg border border-neutral-300 focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffd600]/20 transition outline-none bg-white"
                     >
                         <option value="">Sin rutina</option>
                         @foreach ($rutinas as $rutina)
@@ -70,14 +81,16 @@
             </div>
         </div>
 
-        {{-- Ejercicios del entrenamiento --}}
         <div class="bg-white border border-neutral-200 rounded-2xl shadow-sm p-6 mb-6">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-semibold text-[#0f172a]">Ejercicios realizados</h2>
+            <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+                <h2 class="font-bebas text-2xl text-[#0f172a] tracking-wide pb-1">EJERCICIOS REALIZADOS</h2>
                 <button type="button" onclick="anadirEjercicio()"
-                        class="bg-[#0f172a] hover:bg-[#1e293b] text-white text-sm font-medium px-4 py-2 rounded-lg transition"
+                        class="bg-white border border-[#0f172a] hover:bg-[#0f172a] hover:text-white text-[#0f172a] text-sm font-semibold px-4 py-2 rounded-lg transition flex items-center gap-2"
                         @if ($ejercicios->isEmpty()) disabled @endif>
-                    + Añadir ejercicio
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    Añadir ejercicio
                 </button>
             </div>
 
@@ -85,23 +98,23 @@
                 <p class="text-sm text-red-600 mb-3">{{ $message }}</p>
             @enderror
 
-            <div id="listaEjercicios" class="space-y-3">
-                {{-- Aquí se cargarán los ejercicios existentes y se podrán añadir nuevos --}}
-            </div>
+            <div id="listaEjercicios" class="space-y-3"></div>
 
             <p id="mensajeVacio" class="text-sm text-neutral-400 text-center py-6 italic hidden">
                 Has eliminado todos los ejercicios. Añade al menos uno para guardar.
             </p>
         </div>
 
-        {{-- Botones --}}
         <div class="flex items-center gap-3">
             <button type="submit"
-                    class="bg-[#facc15] hover:bg-[#eab308] text-[#0f172a] font-semibold px-6 py-2.5 rounded-lg transition shadow-sm hover:shadow-md">
+                    class="bg-[#ffd600] hover:bg-[#e6c000] text-[#0f172a] font-bold px-6 py-3 rounded-lg transition shadow-sm hover:shadow-md flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                </svg>
                 Guardar cambios
             </button>
             <a href="{{ route('entrenamientos.show', $entrenamiento) }}"
-               class="text-neutral-600 hover:text-[#0f172a] px-4 py-2.5 transition">
+               class="text-sm text-neutral-500 hover:text-[#0f172a] px-3 py-2 transition">
                 Cancelar
             </a>
         </div>
@@ -110,40 +123,47 @@
 
 </div>
 
-{{-- Plantilla para nuevas filas de ejercicio (oculta) --}}
 <template id="plantillaEjercicio">
-    <div class="grid grid-cols-12 gap-3 items-end p-4 bg-neutral-50 rounded-lg border border-neutral-200 fila-ejercicio">
-        <div class="col-span-12 md:col-span-5">
-            <label class="block text-xs font-medium text-neutral-600 mb-1">Ejercicio</label>
+    <div class="bg-neutral-50 rounded-lg border border-neutral-200 p-4 fila-ejercicio">
+        {{-- Ejercicio (ancho completo) --}}
+        <div class="mb-3">
+            <label class="block text-xs font-semibold text-neutral-600 mb-1">Ejercicio</label>
             <select name="ejercicios[INDEX][ejercicio_id]" required
-                    class="w-full px-3 py-2 text-sm rounded-lg border border-neutral-300 focus:border-[#facc15] focus:ring-2 focus:ring-[#facc15]/20 transition outline-none bg-white">
+                    class="w-full px-3 py-2 text-sm rounded-lg border border-neutral-300 focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffd600]/20 transition outline-none bg-white">
                 <option value="">— Selecciona —</option>
                 @foreach ($ejercicios as $ej)
                     <option value="{{ $ej->id }}" data-id="{{ $ej->id }}">{{ $ej->nombre }}@if($ej->grupo_muscular) ({{ $ej->grupo_muscular }})@endif</option>
                 @endforeach
             </select>
         </div>
-        <div class="col-span-4 md:col-span-2">
-            <label class="block text-xs font-medium text-neutral-600 mb-1">Series</label>
-            <input type="number" name="ejercicios[INDEX][series]" min="1" max="99" value="3" required
-                   class="w-full px-3 py-2 text-sm rounded-lg border border-neutral-300 focus:border-[#facc15] focus:ring-2 focus:ring-[#facc15]/20 transition outline-none">
-        </div>
-        <div class="col-span-4 md:col-span-2">
-            <label class="block text-xs font-medium text-neutral-600 mb-1">Reps</label>
-            <input type="number" name="ejercicios[INDEX][repeticiones]" min="1" max="999" value="10" required
-                   class="w-full px-3 py-2 text-sm rounded-lg border border-neutral-300 focus:border-[#facc15] focus:ring-2 focus:ring-[#facc15]/20 transition outline-none">
-        </div>
-        <div class="col-span-3 md:col-span-2">
-            <label class="block text-xs font-medium text-neutral-600 mb-1">Peso (kg)</label>
-            <input type="number" name="ejercicios[INDEX][peso]" step="0.01" min="0" max="9999.99" value="0" required
-                   class="w-full px-3 py-2 text-sm rounded-lg border border-neutral-300 focus:border-[#facc15] focus:ring-2 focus:ring-[#facc15]/20 transition outline-none">
-        </div>
-        <div class="col-span-1 md:col-span-1 flex justify-end">
-            <button type="button" onclick="eliminarEjercicio(this)"
-                    class="text-red-600 hover:text-red-800 transition p-2"
-                    title="Eliminar ejercicio">
-                ✕
-            </button>
+
+        {{-- Series / Reps / Peso / Papelera --}}
+        <div class="grid grid-cols-[1fr_1fr_1fr_auto] gap-2 items-end">
+            <div>
+                <label class="block text-xs font-semibold text-neutral-600 mb-1">Series</label>
+                <input type="number" name="ejercicios[INDEX][series]" min="1" max="99" value="3" required
+                       class="w-full px-2 py-2 text-sm rounded-lg border border-neutral-300 focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffd600]/20 transition outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-neutral-600 mb-1">Reps</label>
+                <input type="number" name="ejercicios[INDEX][repeticiones]" min="1" max="999" value="10" required
+                       class="w-full px-2 py-2 text-sm rounded-lg border border-neutral-300 focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffd600]/20 transition outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-neutral-600 mb-1">Peso (kg)</label>
+                <input type="number" name="ejercicios[INDEX][peso]" step="0.01" min="0" max="9999.99" value="0" required
+                       class="w-full px-2 py-2 text-sm rounded-lg border border-neutral-300 focus:border-[#ffd600] focus:ring-2 focus:ring-[#ffd600]/20 transition outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-semibold text-transparent mb-1 select-none">.</label>
+                <button type="button" onclick="eliminarEjercicio(this)"
+                        class="w-10 h-10 flex items-center justify-center bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition"
+                        title="Eliminar">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22M9 7V4a1 1 0 011-1h4a1 1 0 011 1v3"/>
+                    </svg>
+                </button>
+            </div>
         </div>
     </div>
 </template>
@@ -156,24 +176,17 @@
         const lista = document.getElementById('listaEjercicios');
         const mensajeVacio = document.getElementById('mensajeVacio');
 
-        // Clonar la plantilla y reemplazar INDEX por el contador actual.
         const html = plantilla.innerHTML.replace(/INDEX/g, contadorEjercicios);
         const div = document.createElement('div');
         div.innerHTML = html;
         const nuevaFila = div.firstElementChild;
         lista.appendChild(nuevaFila);
 
-        // Si hay datos de precarga (ejercicios existentes), rellenarlos.
         if (datosPrecarga) {
-            const selectEjercicio = nuevaFila.querySelector('select[name*="[ejercicio_id]"]');
-            const inputSeries = nuevaFila.querySelector('input[name*="[series]"]');
-            const inputReps = nuevaFila.querySelector('input[name*="[repeticiones]"]');
-            const inputPeso = nuevaFila.querySelector('input[name*="[peso]"]');
-
-            selectEjercicio.value = datosPrecarga.ejercicio_id;
-            inputSeries.value = datosPrecarga.series;
-            inputReps.value = datosPrecarga.repeticiones;
-            inputPeso.value = datosPrecarga.peso;
+            nuevaFila.querySelector('select[name*="[ejercicio_id]"]').value = datosPrecarga.ejercicio_id;
+            nuevaFila.querySelector('input[name*="[series]"]').value = datosPrecarga.series;
+            nuevaFila.querySelector('input[name*="[repeticiones]"]').value = datosPrecarga.repeticiones;
+            nuevaFila.querySelector('input[name*="[peso]"]').value = datosPrecarga.peso;
         }
 
         contadorEjercicios++;
@@ -182,16 +195,11 @@
 
     function eliminarEjercicio(boton) {
         boton.closest('.fila-ejercicio').remove();
-
         const lista = document.getElementById('listaEjercicios');
         const mensajeVacio = document.getElementById('mensajeVacio');
-
-        if (lista.children.length === 0) {
-            mensajeVacio.classList.remove('hidden');
-        }
+        if (lista.children.length === 0) mensajeVacio.classList.remove('hidden');
     }
 
-    // Precargar los ejercicios existentes al cargar la página.
     document.addEventListener('DOMContentLoaded', function() {
         @foreach ($entrenamiento->detalles as $detalle)
             anadirEjercicio({

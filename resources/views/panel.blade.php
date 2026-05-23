@@ -55,7 +55,7 @@
         {{-- ===================================================== --}}
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
 
-            {{-- Total entrenamientos --}}
+           {{-- Total entrenamientos --}}
             <div class="bg-white border border-neutral-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition">
                 <div class="flex items-start gap-3 mb-2">
                     <div class="w-11 h-11 rounded-xl bg-[#ffd600]/20 flex items-center justify-center flex-shrink-0">
@@ -63,14 +63,15 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
                     </div>
-                    <div class="text-xs font-semibold text-neutral-500 uppercase tracking-wider mt-1">
-                        Entrenamientos
+                    <div class="text-[10px] sm:text-xs font-semibold text-neutral-500 uppercase tracking-wider mt-1 min-w-0">
+                        <span class="sm:hidden">Entrenos</span>
+                        <span class="hidden sm:inline">Entrenamientos</span>
                     </div>
                 </div>
                 <div class="font-bebas text-5xl text-[#0f172a] leading-none">{{ $totalEntrenamientos }}</div>
                 <div class="text-xs text-neutral-400 mt-2">en total</div>
             </div>
-
+            
             {{-- Este mes (amarillo destacado con comparativa) --}}
             <div class="bg-[#ffd600] border border-[#eab308] rounded-2xl p-5 shadow-sm hover:shadow-md transition">
                 <div class="flex items-start gap-3 mb-2">
@@ -327,8 +328,12 @@
         {{-- ===================================================== --}}
         <div class="flex items-center justify-between mb-3">
             <h2 class="font-bebas text-2xl text-[#0f172a] tracking-wide">ÚLTIMOS ENTRENAMIENTOS</h2>
-            <a href="{{ route('entrenamientos.index') }}" class="text-sm text-[#854d0e] hover:text-[#0f172a] font-medium transition">
-                Ver todos →
+            <a href="{{ route('entrenamientos.index') }}"
+               class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-semibold text-[#0f172a] bg-[#ffd600]/10 hover:bg-[#ffd600]/20 border border-[#ffd600]/40 hover:border-[#ffd600] rounded-lg transition">
+                Ver todos
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                </svg>
             </a>
         </div>
 
